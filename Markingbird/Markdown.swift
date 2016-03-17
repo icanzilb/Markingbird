@@ -1526,7 +1526,7 @@ public struct Markdown {
             if (r > 90 || c == colon) && c != at {
                 sb += String(count: 1, repeatedValue: UnicodeScalar(UInt32(c))) // m
             } else if r < 45 {
-                sb += NSString(format:"&#x%02x;", Int(c)).bridge()                      // &#x6D
+                //sb += NSString(format:"&#x%02x;", Int(c)).bridge()                      // &#x6D
             } else {
                 sb += "&#\(c);"                                                 // &#109
             }
@@ -1626,7 +1626,7 @@ public struct Markdown {
 
             if (encode) {
                 sb += "%"
-                sb += NSString(format:"%2x", UInt(c)).bridge()
+                //sb += NSString(format:"%2x", UInt(c)).bridge()
             }
             else {
                 sb += String(count: 1, repeatedValue: UnicodeScalar(c))
