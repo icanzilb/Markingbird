@@ -520,7 +520,7 @@ public struct Markdown {
 
         let group3Value = match.valueOfGroupAtIndex(3)
         if group3Value.length != 0 {
-            _titles[linkID] = NSString(string: group3Value).stringByReplacingOccurrencesOfString("\"",
+            _titles[linkID] = group3Value.stringByReplacingOccurrencesOfString("\"",
                 withString: "&quot").bridge()
         }
 
@@ -716,7 +716,7 @@ public struct Markdown {
         var tagStart = 0
         var tokens = Array<Token>()
 
-        let str = text as NSString
+        let str = text.bridge()
 
         // this regex is derived from the _tokenize() subroutine in Brad Choate's MTRegex plugin.
         // http://www.bradchoate.com/past/mtregex.php
@@ -803,7 +803,7 @@ public struct Markdown {
     }
 
     private func saveFromAutoLinking(s: String) -> String {
-        return NSString(string: s).stringByReplacingOccurrencesOfString("://", withString: Markdown.autoLinkPreventionMarker).bridge()
+        return NSString(string: s).stringByReplacingOccurrencesOfString("://", withString: Markdown.autoLinkPreventionMarker)
     }
 
     private func anchorRefEvaluator(match: Match) -> String {
@@ -874,13 +874,13 @@ public struct Markdown {
 
         var result: String
 
-        url = encodeProblemUrlChars(url.bridge())
-        url = escapeBoldItalic(url.bridge())
+        url = encodeProblemUrlChars(url.bridge()).bridge()
+        url = escapeBoldItalic(url.bridge()).bridge()
         if url.hasPrefix("<") && url.hasSuffix(">") {
-            url = url.substringWithRange(NSMakeRange(1, url.length - 2)) // remove <>'s surrounding URL, if present
+            url = url.substringWithRange(NSMakeRange(1, url.length - 2)).bridge() // remove <>'s surrounding URL, if present
         }
 
-        result = "<a href=\"\(url)\""
+        result = "<a href=\"\(url.bridge())\""
 
         if title.length != 0 {
             title = Markdown.attributeEncode(title.bridge())
