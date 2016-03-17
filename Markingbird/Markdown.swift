@@ -521,7 +521,7 @@ public struct Markdown {
         let group3Value = match.valueOfGroupAtIndex(3)
         if group3Value.length != 0 {
             _titles[linkID] = group3Value.stringByReplacingOccurrencesOfString("\"",
-                withString: "&quot").bridge()
+                withString: "&quot")
         }
 
         return ""
@@ -883,8 +883,8 @@ public struct Markdown {
         result = "<a href=\"\(url.bridge())\""
 
         if title.length != 0 {
-            title = Markdown.attributeEncode(title.bridge())
-            title = escapeBoldItalic(title.bridge())
+            title = Markdown.attributeEncode(title.bridge()).bridge()
+            title = escapeBoldItalic(title.bridge()).bridge()
             result += " title=\"\(title)\""
         }
 
@@ -984,7 +984,7 @@ public struct Markdown {
         let title = match.valueOfGroupAtIndex(6)
 
         if url.hasPrefix("<") && url.hasSuffix(">") {
-            url = url.substringWithRange(NSMakeRange(1, url.length - 2))    // Remove <>'s surrounding URL, if present
+            url = url.substringWithRange(NSMakeRange(1, url.length - 2)).bridge()    // Remove <>'s surrounding URL, if present
         }
         return imageTag(url.bridge(), altText: alt.bridge(), title: title.bridge())
     }
@@ -1191,15 +1191,15 @@ public struct Markdown {
 
             if containsDoubleNewline || lastItemHadADoubleNewline {
                 // we could correct any bad indentation here..
-                item = self.runBlockGamut(self.outdent(item.bridge()) + "\n", unhash: false)
+                item = self.runBlockGamut(self.outdent(item.bridge()) + "\n", unhash: false).bridge()
             }
             else {
                 // recursion for sub-lists
-                item = self.doLists(self.outdent(item.bridge()), isInsideParagraphlessListItem: true)
-                item = Markdown.trimEnd(item, "\n")
+                item = self.doLists(self.outdent(item.bridge()), isInsideParagraphlessListItem: true).bridge()
+                item = Markdown.trimEnd(item, "\n").bridge()
                 if (!isInsideParagraphlessListItem) {
                     // only the outer-most item should run this, otherwise it's run multiple times for the inner ones
-                    item = self.runSpanGamut(item.bridge())
+                    item = self.runSpanGamut(item.bridge()).bridge()
                 }
             }
             lastItemHadADoubleNewline = endsWithDoubleNewline
@@ -1229,14 +1229,14 @@ public struct Markdown {
 
     /// Turn Markdown 4-space indented code into HTML pre code blocks
     private func doCodeBlocks(var text: String) -> String {
-        text = Markdown._codeBlock.replace(text) { self.codeBlockEvaluator($0) }
+        text = (Markdown._codeBlock.replace(text) { self.codeBlockEvaluator($0) }).bridge()
         return text
     }
 
     private func codeBlockEvaluator(match: Match) -> String {
         var codeBlock = match.valueOfGroupAtIndex(1)
 
-        codeBlock = encodeCode(outdent(codeBlock.bridge()))
+        codeBlock = encodeCode(outdent(codeBlock.bridge())).bridge()
         codeBlock = Markdown._newlinesLeadingTrailing.replace(codeBlock.bridge(), "")
 
         return "\n\n<pre><code>\(codeBlock)\n</code></pre>\n\n"
