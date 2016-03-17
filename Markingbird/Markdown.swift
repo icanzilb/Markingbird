@@ -115,6 +115,23 @@ software, even if advised of the possibility of such damage.
 
 import Foundation
 
+#if os(Linux)
+    import Glibc
+#else
+
+extension String {
+    func bridge() -> NSString {
+        return NSString(string: self)
+    }
+}
+    
+extension NSString {
+    func bridge() -> String {
+        return self as String
+    }
+}
+
+#endif
 
 public struct MarkdownOptions {
     /// when true, (most) bare plain URLs are auto-hyperlinked
@@ -338,7 +355,9 @@ public struct Markdown {
     }
 
     /// Perform transformations that occur *within* block-level tags like paragraphs, headers, and list items.
-    private func runSpanGamut(var text: String) -> String {
+    private func runSpanGamut(text: String) -> String {
+        var text = text
+        
         text = doCodeSpans(text)
         text = escapeSpecialCharsWithinTagAttributes(text)
         text = escapeBackslashes(text)
@@ -351,9 +370,10 @@ public struct Markdown {
         // delimiters in inline links like [this](<url>).
         text = doAutoLinks(text)
 
-        text = text.stringByReplacingOccurrencesOfString(Markdown.autoLinkPreventionMarker,
+        let text1: NSString = NSString(string: text).stringByReplacingOccurrencesOfString(Markdown.autoLinkPreventionMarker,
             withString: "://")
-
+        text = text1.bridge()
+            
         text = encodeAmpsAndAngles(text)
         text = doItalicsAndBold(text)
         text = doHardBreaks(text)
@@ -501,8 +521,8 @@ public struct Markdown {
 
         let group3Value = match.valueOfGroupAtIndex(3)
         if group3Value.length != 0 {
-            _titles[linkID] = group3Value.stringByReplacingOccurrencesOfString("\"",
-                withString: "&quot")
+            _titles[linkID] = NSString(string: group3Value).stringByReplacingOccurrencesOfString("\"",
+                withString: "&quot").bridge()
         }
 
         return ""
@@ -567,7 +587,7 @@ public struct Markdown {
                 ")*"].joinWithSeparator("\n"),
                 _nestDepth)
 
-        let content2 = content.stringByReplacingOccurrencesOfString("\\2", withString: "\\3")
+        let content2: String = NSString(string: content).stringByReplacingOccurrencesOfString("\\2", withString: "\\3").bridge()
 
         // First, look for nested blocks, e.g.:
         // 	<div>
@@ -580,7 +600,7 @@ public struct Markdown {
         // the inner nested divs must be indented.
         // We need to do this before the next, more liberal match, because the next
         // match will start at the first `<div>` and stop at the first `</div>`.
-        var pattern = [
+        var pattern: NSString = [
             "(?>",
             "      (?>",
             "        (?<=\\n)     # Starting at the beginning of a line",
@@ -641,7 +661,8 @@ public struct Markdown {
             "          ",
             "      )",
             ")"
-            ].joinWithSeparator("\n")
+            ].joinWithSeparator("\n").bridge()
+        
         pattern = pattern.stringByReplacingOccurrencesOfString("$less_than_tab",
             withString: String(_tabWidth - 1))
         pattern = pattern.stringByReplacingOccurrencesOfString("$block_tags_b_re",
@@ -655,7 +676,7 @@ public struct Markdown {
         pattern = pattern.stringByReplacingOccurrencesOfString("$content",
             withString: content)
 
-        return pattern
+        return pattern.bridge()
     }
 
     /// replaces any block-level HTML blocks with hash entries
@@ -783,7 +804,7 @@ public struct Markdown {
     }
 
     private func saveFromAutoLinking(s: String) -> String {
-        return s.stringByReplacingOccurrencesOfString("://", withString: Markdown.autoLinkPreventionMarker)
+        return NSString(string: s).stringByReplacingOccurrencesOfString("://", withString: Markdown.autoLinkPreventionMarker).bridge()
     }
 
     private func anchorRefEvaluator(match: Match) -> String {
@@ -1577,12 +1598,12 @@ public struct Markdown {
 
     /// escapes Bold [ * ] and Italic [ _ ] characters
     private func escapeBoldItalic(s: String) -> String {
-        var str = s as NSString
+        var str: NSString = s.bridge()
         str = str.stringByReplacingOccurrencesOfString("*",
             withString: Markdown._escapeTable["*"]!)
         str = str.stringByReplacingOccurrencesOfString("_",
             withString: Markdown._escapeTable["_"]!)
-        return str as String
+        return str.bridge()
     }
 
     private static let _problemUrlChars = NSCharacterSet(charactersInString: "\"'*()[]$:")
@@ -1631,12 +1652,12 @@ public struct Markdown {
             var value = token.value
 
             if token.type == TokenType.Tag {
-                value = value.stringByReplacingOccurrencesOfString("\\",
-                    withString: Markdown._escapeTable["\\"]!)
+                value = NSString(string: value).stringByReplacingOccurrencesOfString("\\",
+                    withString: Markdown._escapeTable["\\"]!).bridge()
 
                 if _autoHyperlink && value.hasPrefix("<!") { // escape slashes in comments to prevent autolinking there -- http://meta.stackoverflow.com/questions/95987/html-comment-containing-url-breaks-if-followed-by-another-html-comment
-                    value = value.stringByReplacingOccurrencesOfString("/",
-                        withString: Markdown._escapeTable["/"]!)
+                    value = NSString(string: value).stringByReplacingOccurrencesOfString("/",
+                        withString: Markdown._escapeTable["/"]!).bridge()
                 }
 
                 value = Regex.replace(value,
@@ -1700,9 +1721,9 @@ public struct Markdown {
     }
 
     private static func attributeEncode(s: String) -> String {
-        return s.stringByReplacingOccurrencesOfString(">", withString: "&gt;")
+        return NSString(string: s).stringByReplacingOccurrencesOfString(">", withString: "&gt;")
             .stringByReplacingOccurrencesOfString("<", withString: "&lt;")
-            .stringByReplacingOccurrencesOfString("\"", withString: "&quot;")
+            .stringByReplacingOccurrencesOfString("\"", withString: "&quot;").bridge()
     }
 
     private static func doesString(string: NSString, containSubstring substring: NSString) -> Bool {
