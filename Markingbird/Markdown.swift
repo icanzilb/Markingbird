@@ -1230,14 +1230,14 @@ public struct Markdown {
     /// Turn Markdown 4-space indented code into HTML pre code blocks
     private func doCodeBlocks(var text: String) -> String {
         text = (Markdown._codeBlock.replace(text) { self.codeBlockEvaluator($0) })
-        return text.bridge()
+        return text
     }
 
     private func codeBlockEvaluator(match: Match) -> String {
         var codeBlock = match.valueOfGroupAtIndex(1)
 
         codeBlock = encodeCode(outdent(codeBlock.bridge())).bridge()
-        codeBlock = Markdown._newlinesLeadingTrailing.replace(codeBlock.bridge(), "")
+        codeBlock = Markdown._newlinesLeadingTrailing.replace(codeBlock.bridge(), "").bridge()
 
         return "\n\n<pre><code>\(codeBlock)\n</code></pre>\n\n"
     }
@@ -1599,9 +1599,9 @@ public struct Markdown {
     private func escapeBoldItalic(s: String) -> String {
         var str: NSString = s.bridge()
         str = str.stringByReplacingOccurrencesOfString("*",
-            withString: Markdown._escapeTable["*"]!)
+            withString: Markdown._escapeTable["*"]!).bridge()
         str = str.stringByReplacingOccurrencesOfString("_",
-            withString: Markdown._escapeTable["_"]!)
+            withString: Markdown._escapeTable["_"]!).bridge()
         return str.bridge()
     }
 
@@ -1614,7 +1614,7 @@ public struct Markdown {
         var sb = ""
         var encode = false
 
-        let str = url as NSString
+        let str = url.bridge()
         for i in 0..<str.length {
             let c = str.characterAtIndex(i)
             encode = Markdown._problemUrlChars.characterIsMember(c)
@@ -1720,9 +1720,9 @@ public struct Markdown {
     }
 
     private static func attributeEncode(s: String) -> String {
-        return NSString(string: s).stringByReplacingOccurrencesOfString(">", withString: "&gt;")
-            .stringByReplacingOccurrencesOfString("<", withString: "&lt;")
-            .stringByReplacingOccurrencesOfString("\"", withString: "&quot;").bridge()
+        return s.bridge().stringByReplacingOccurrencesOfString(">", withString: "&gt;").bridge()
+            .stringByReplacingOccurrencesOfString("<", withString: "&lt;").bridge()
+            .stringByReplacingOccurrencesOfString("\"", withString: "&quot;")
     }
 
     private static func doesString(string: NSString, containSubstring substring: NSString) -> Bool {
@@ -1824,7 +1824,7 @@ private struct MarkdownRegex {
     }
 
     private func replace(input: String, _ replacement: String) -> String {
-        let s = input as NSString
+        let s = input.bridge()
         let result = regularExpresson.stringByReplacingMatchesInString(s.bridge(),
             options: NSMatchingOptions(rawValue: 0),
             range: NSMakeRange(0, s.length),
@@ -1840,7 +1840,7 @@ private struct MarkdownRegex {
     private func replace(input: String, evaluator: (MarkdownRegexMatch) -> String) -> String {
         // Get list of all replacements to be made
         var replacements = Array<(NSRange, String)>()
-        let s = input as NSString
+        let s = input.bridge()
         let options = NSMatchingOptions(rawValue: 0)
         let range = NSMakeRange(0, s.length)
         regularExpresson.enumerateMatchesInString(s.bridge(),
@@ -1883,7 +1883,7 @@ private struct MarkdownRegex {
     private func matches(input: String) -> [MarkdownRegexMatch] {
         var matchArray = Array<MarkdownRegexMatch>()
 
-        let s = input as NSString
+        let s = input.bridge()
         let options = NSMatchingOptions(rawValue: 0)
         let range = NSMakeRange(0, s.length)
         regularExpresson.enumerateMatchesInString(s.bridge(),
@@ -1903,7 +1903,7 @@ private struct MarkdownRegex {
     }
 
     private func isMatch(input: String) -> Bool {
-        let s = input as NSString
+        let s = input.bridge()
         let firstMatchRange = regularExpresson.rangeOfFirstMatchInString(s.bridge(),
             options: NSMatchingOptions(rawValue: 0),
             range: NSMakeRange(0, s.length))
@@ -1920,7 +1920,7 @@ private struct MarkdownRegex {
 
         var nextStartIndex = 0
 
-        let s = input as NSString
+        let s = input.bridge()
         let options = NSMatchingOptions(rawValue: 0)
         let range = NSMakeRange(0, s.length)
         regularExpresson.enumerateMatchesInString(input,
@@ -1961,7 +1961,7 @@ private struct MarkdownRegexMatch {
     }
 
     var value: NSString {
-        return string.substringWithRange(textCheckingResult.range)
+        return string.substringWithRange(textCheckingResult.range).bridge()
     }
 
     var index: Int {
@@ -1979,9 +1979,9 @@ private struct MarkdownRegexMatch {
                 return ""
             }
             assert(groupRange.location + groupRange.length <= string.length, "range must be contained within string")
-            return string.substringWithRange(groupRange)
+            return string.substringWithRange(groupRange).bridge()
         }
-        return ""
+        return "".bridge()
     }
 }
 
