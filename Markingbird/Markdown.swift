@@ -405,7 +405,7 @@ public struct Markdown {
                         keepGoing = false
                         let graf = grafs[i]
                         grafs[i] = Markdown._htmlBlockHash.replace(graf) { match in
-                            if let replacementValue = self._htmlBlocks[match.value as String] {
+                            if let replacementValue = self._htmlBlocks[match.value.bridge()] {
                                 keepGoing = true
                                 return replacementValue
                             }
@@ -515,8 +515,8 @@ public struct Markdown {
 
     private mutating func linkEvaluator(match: Match) -> String
     {
-        let linkID = match.valueOfGroupAtIndex(1).bridge() as String
-        _urls[linkID] = encodeAmpsAndAngles(match.valueOfGroupAtIndex(2) as String)
+        let linkID = match.valueOfGroupAtIndex(1).bridge().bridge()
+        _urls[linkID] = encodeAmpsAndAngles(match.valueOfGroupAtIndex(2).bridge())
 
         let group3Value = match.valueOfGroupAtIndex(3)
         if group3Value.length != 0 {
@@ -660,22 +660,22 @@ public struct Markdown {
             "          ",
             "      )",
             ")"
-            ].joinWithSeparator("\n").bridge()
+            ].joinWithSeparator("\n")
         
-        pattern = pattern.stringByReplacingOccurrencesOfString("$less_than_tab",
+        pattern = NSString(string: pattern).stringByReplacingOccurrencesOfString("$less_than_tab",
             withString: String(_tabWidth - 1))
-        pattern = pattern.stringByReplacingOccurrencesOfString("$block_tags_b_re",
+        pattern = NSString(string: pattern).stringByReplacingOccurrencesOfString("$block_tags_b_re",
             withString: blockTagsB)
-        pattern = pattern.stringByReplacingOccurrencesOfString("$block_tags_a_re",
+        pattern = NSString(string: pattern).stringByReplacingOccurrencesOfString("$block_tags_a_re",
             withString: blockTagsA)
-        pattern = pattern.stringByReplacingOccurrencesOfString("$attr",
+        pattern = NSString(string: pattern).stringByReplacingOccurrencesOfString("$attr",
             withString: attr)
-        pattern = pattern.stringByReplacingOccurrencesOfString("$content2",
+        pattern = NSString(string: pattern).stringByReplacingOccurrencesOfString("$content2",
             withString: content2)
-        pattern = pattern.stringByReplacingOccurrencesOfString("$content",
+        pattern = NSString(string: pattern).stringByReplacingOccurrencesOfString("$content",
             withString: content)
 
-        return pattern.bridge()
+        return pattern
     }
 
     /// replaces any block-level HTML blocks with hash entries
@@ -684,7 +684,7 @@ public struct Markdown {
     }
 
     private mutating func htmlEvaluator(match: Match) -> String {
-        let text: String = match.valueOfGroupAtIndex(1) as String ?? ""
+        let text: String = match.valueOfGroupAtIndex(1).bridge() ?? ""
         let key = Markdown.getHashKey(text, isHtmlBlock: true)
         _htmlBlocks[key] = text
 
@@ -727,7 +727,7 @@ public struct Markdown {
                 let range = NSMakeRange(pos, tagStart - pos)
                 tokens.append(Token(type: .Text, value: str.substringWithRange(range)))
             }
-            tokens.append(Token(type: .Tag, value: match.value as String))
+            tokens.append(Token(type: .Tag, value: match.value.bridge()))
             pos = tagStart + match.length
         }
 
@@ -808,7 +808,7 @@ public struct Markdown {
 
     private func anchorRefEvaluator(match: Match) -> String {
         let wholeMatch = match.valueOfGroupAtIndex(1)
-        let linkText = saveFromAutoLinking(match.valueOfGroupAtIndex(2) as String)
+        let linkText = saveFromAutoLinking(match.valueOfGroupAtIndex(2).bridge())
         var linkID = match.valueOfGroupAtIndex(3).lowercaseString
 
         var result: String
@@ -832,7 +832,7 @@ public struct Markdown {
             result += ">\(linkText)</a>"
         }
         else {
-            result = wholeMatch as String
+            result = wholeMatch.bridge()
         }
 
         return result
