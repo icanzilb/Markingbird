@@ -370,7 +370,7 @@ public struct Markdown {
         // delimiters in inline links like [this](<url>).
         text = doAutoLinks(text)
 
-        let text1: NSString = NSString(string: text).stringByReplacingOccurrencesOfString(Markdown.autoLinkPreventionMarker,
+        let text1 = NSString(string: text).stringByReplacingOccurrencesOfString(Markdown.autoLinkPreventionMarker,
             withString: "://")
         text = text1.bridge()
             
