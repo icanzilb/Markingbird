@@ -370,10 +370,9 @@ public struct Markdown {
         // delimiters in inline links like [this](<url>).
         text = doAutoLinks(text)
 
-        let text1 = NSString(string: text).stringByReplacingOccurrencesOfString(Markdown.autoLinkPreventionMarker,
+        text = NSString(string: text).stringByReplacingOccurrencesOfString(Markdown.autoLinkPreventionMarker,
             withString: "://")
-        text = text1.bridge()
-            
+        
         text = encodeAmpsAndAngles(text)
         text = doItalicsAndBold(text)
         text = doHardBreaks(text)
@@ -516,7 +515,7 @@ public struct Markdown {
 
     private mutating func linkEvaluator(match: Match) -> String
     {
-        let linkID = match.valueOfGroupAtIndex(1) as String
+        let linkID = match.valueOfGroupAtIndex(1).bridge() as String
         _urls[linkID] = encodeAmpsAndAngles(match.valueOfGroupAtIndex(2) as String)
 
         let group3Value = match.valueOfGroupAtIndex(3)
@@ -587,7 +586,7 @@ public struct Markdown {
                 ")*"].joinWithSeparator("\n"),
                 _nestDepth)
 
-        let content2: String = NSString(string: content).stringByReplacingOccurrencesOfString("\\2", withString: "\\3").bridge()
+        let content2 = NSString(string: content).stringByReplacingOccurrencesOfString("\\2", withString: "\\3").bridge()
 
         // First, look for nested blocks, e.g.:
         // 	<div>
@@ -600,7 +599,7 @@ public struct Markdown {
         // the inner nested divs must be indented.
         // We need to do this before the next, more liberal match, because the next
         // match will start at the first `<div>` and stop at the first `</div>`.
-        var pattern: NSString = [
+        var pattern = [
             "(?>",
             "      (?>",
             "        (?<=\\n)     # Starting at the beginning of a line",
