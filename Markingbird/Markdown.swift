@@ -1229,8 +1229,8 @@ public struct Markdown {
 
     /// Turn Markdown 4-space indented code into HTML pre code blocks
     private func doCodeBlocks(var text: String) -> String {
-        text = (Markdown._codeBlock.replace(text) { self.codeBlockEvaluator($0) }).bridge()
-        return text
+        text = (Markdown._codeBlock.replace(text) { self.codeBlockEvaluator($0) })
+        return text.bridge()
     }
 
     private func codeBlockEvaluator(match: Match) -> String {
@@ -1282,10 +1282,10 @@ public struct Markdown {
 
     private func codeSpanEvaluator(match: Match) -> String {
         var span = match.valueOfGroupAtIndex(2)
-        span = Regex.replace(span.bridge(), pattern: "^\\p{Z}*", replacement: "") // leading whitespace
-        span = Regex.replace(span.bridge(), pattern: "\\p{Z}*$", replacement: "") // trailing whitespace
-        span = encodeCode(span.bridge())
-        span = saveFromAutoLinking(span.bridge()) // to prevent auto-linking. Not necessary in code *blocks*, but in code spans.
+        span = Regex.replace(span.bridge(), pattern: "^\\p{Z}*", replacement: "").bridge() // leading whitespace
+        span = Regex.replace(span.bridge(), pattern: "\\p{Z}*$", replacement: "").bridge() // trailing whitespace
+        span = encodeCode(span.bridge()).bridge()
+        span = saveFromAutoLinking(span.bridge()).bridge() // to prevent auto-linking. Not necessary in code *blocks*, but in code spans.
 
         return "<code>\(span)</code>"
     }
@@ -1424,13 +1424,13 @@ public struct Markdown {
             link = Regex.replace(link.bridge(), pattern: "\\){1,\(-level)}$", evaluator: { m in
                 tail = m.value
                 return ""
-            })
+            }).bridge()
         }
         if tail.length > 0 {
             let lastChar = link.substringFromIndex(link.length - 1)
             if !_endCharRegex.isMatch(lastChar) {
-                tail = "\(lastChar)\(tail)"
-                link = link.substringToIndex(link.length - 1)
+                tail = "\(lastChar)\(tail)".bridge()
+                link = link.substringToIndex(link.length - 1).bridge()
             }
         }
         return "<\(proto)\(link)>\(tail)"
@@ -1526,7 +1526,7 @@ public struct Markdown {
             if (r > 90 || c == colon) && c != at {
                 sb += String(count: 1, repeatedValue: UnicodeScalar(UInt32(c))) // m
             } else if r < 45 {
-                sb += NSString(format:"&#x%02x;", UInt(c)).bridge()                      // &#x6D
+                sb += NSString(format:"&#x%02x;", Int(c)).bridge()                      // &#x6D
             } else {
                 sb += "&#\(c);"                                                 // &#109
             }
